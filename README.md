@@ -32,9 +32,9 @@ La méthode NMF est utilisée pour extraire des thèmes à partir d’une repré
 
 Elle semble pour le moment produire les résultats les plus intéressants, même si les paramètres doivent encore être ajustés pour obtenir des topics plus stables et plus interprétables.
 
-### LDA
+### KMeans
 
-La méthode LDA a également été testée afin de comparer les résultats avec ceux obtenus par NMF.
+La méthode KMeans a également été testée afin de comparer les résultats avec ceux obtenus par NMF.
 
 Elle permet d’obtenir une autre représentation thématique du corpus, mais les premiers résultats nécessitent encore des améliorations et des réglages.
 
@@ -56,7 +56,7 @@ Les prochains objectifs sont :
 
 - Python
 - pandas
-- scikit-learn => pour NMF et LDA
+- scikit-learn => pour NMF et KMeans
 - spaCy
 
 

@@ -22,4 +22,5 @@ build/
 .idea/
 .vscode/
 
+scr_paquet_mots
 corpus_zola_nettoye.csv
