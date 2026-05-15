@@ -11,14 +11,14 @@ Le but est de tester plusieurs approches de topic modeling pour faire émerger d
 Pour le moment, deux méthodes principales ont été utilisées :
 
 - **NMF** (*Non-negative Matrix Factorization*)
-- **LDA** (*Latent Dirichlet Allocation*)
+- **KMeans** (clustering)
 
 ## Prétraitement des textes
 
 Avant l’application des modèles, les textes ont été prétraités afin de réduire le bruit lexical :
 
 - nettoyage général du texte ;
-- segmentation du corpus ;
+- segmentation du corpus en paquets de phrases ;
 - lemmatisation ;
 - suppression des mots vides ;
 - conservation de certaines catégories grammaticales pertinentes ;
@@ -48,8 +48,7 @@ Les prochains objectifs sont :
 
 - améliorer la stabilité des topics ;
 - tester différents paramètres ;
-- comparer les résultats entre NMF et LDA ;
-- annoter manuellement les topics obtenus ;
+- comparer les résultats entre NMF, KMeans et d’autres méthodes de topic modeling ;
 - relier les topics à des passages précis du corpus.
 
 ## Technologies utilisées
