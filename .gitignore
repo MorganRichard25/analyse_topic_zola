@@ -1,26 +1,39 @@
-#environement
+# Environnements
 .env
-.venv
+.venv/
 venv/
-venv
+env/
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.env
-*.venv
 *.egg-info/
 dist/
 build/
 *.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Système
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Fichiers temporaires
 *.log
 *.bak
 *.tmp
 *.swp
 *.swo
-*.DS_Store
-.idea/
-.vscode/
 
-scr_paquet_mots
+# Anciennes expérimentations
+scr_paquet_mots/
+
+# Fichiers générés
 corpus_zola_nettoye.csv
