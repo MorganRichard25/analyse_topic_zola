@@ -34,3 +34,9 @@ Thumbs.db
 
 # Fichiers générés
 corpus_zola_nettoye.csv
+
+# Fichiers de données
+Article_Topics_Zola.aux
+Article_Topics_Zola.fls
+Article_Topics_Zola.fdb_latexmk
+Article_Topics_Zola.synctex.gz
