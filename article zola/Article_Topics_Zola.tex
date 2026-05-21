@@ -13,7 +13,7 @@
   frame=single,
   numbers=left,
   numberstyle=\tiny,
-  captionpos=b
+  captionpos=b,
   showstringspaces=false
 }
 
@@ -51,7 +51,7 @@ Comme dit en introduction, ce travail porte sur un corpus de textes de Zola. Un 
 
 Le corpus comprend les romans suivants :
 
-\begin{longtable}{lll}
+\begin{longtable}{p{1.6cm}p{4.2cm}p{8cm}}
 \caption{Corpus des œuvres de Zola utilisées dans l'analyse}\\
 \toprule
 \textbf{Date} & \textbf{Titre} & \textbf{Fichier} \\
@@ -120,6 +120,56 @@ De plus, le choix a été fait de conserver une seule phrase par ligne. Ce forma
 
 Cette logique de formatage a également été appliquée en prévision des analyses futures. Les romans issus de prochains traitements pourront ainsi être intégrés de manière cohérente au corpus. Ce choix permet de limiter les différences de structure entre les fichiers et d'obtenir un format homogène pour l'analyse sans trop complexifier le processus de préparation des données.
 
+\begin{longtable}{p{8cm}r}
+\caption{Nombre de tokens par roman dans l'ordre chronologique}  \\
+\toprule
+\textbf{Titre du roman} & \textbf{Nombre de tokens} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Titre du roman} & \textbf{Nombre de tokens} \\
+\midrule
+\endhead
+
+La confession de Claude & 47253 \\
+Le vœu d'une morte & 38722 \\
+Les mystères de Marseille & 125253 \\
+Thérèse Raquin & 66363 \\
+Madeleine Férat & 97318 \\
+La fortune des Rougon & 116685 \\
+La curée & 105120 \\
+Le ventre de Paris & 110442 \\
+La conquête de Plassans & 113245 \\
+La faute de l'abbé Mouret & 114667 \\
+Son Excellence Eugène Rougon & 126186 \\
+L'assommoir & 158340 \\
+Une page d'amour & 102185 \\
+Nana & 141573 \\
+Pot-Bouille & 134844 \\
+Au Bonheur des dames & 147521 \\
+La joie de vivre & 117255 \\
+Germinal & 164473 \\
+L'œuvre & 130613 \\
+La terre & 163687 \\
+Le rêve & 66379 \\
+La bête humaine & 125418 \\
+L'argent & 143010 \\
+La débâcle & 187046 \\
+Le docteur Pascal & 112713 \\
+Lourdes & 173511 \\
+Rome & 233958 \\
+Paris & 177389 \\
+Fécondité & 220131 \\
+Travail & 198712 \\
+Vérité & 223274 \\
+
+\bottomrule
+\end{longtable}
+
+Le tableau fournit une description quantitative du corpus en indiquant, pour chaque roman, le nombre de tokens obtenus après nettoyage. Les œuvres sont présentées dans l'ordre chronologique, ce qui permet d'observer l'évolution du volume textuel au sein de la production romanesque de Zola. Les écarts sont importants entre les romans courts du début de carrière, comme \textit{Le vœu d'une morte}, et les œuvres plus volumineuses de la fin de carrière, notamment \textit{Rome}, \textit{Fécondité}, \textit{Travail} et \textit{Vérité}.
+
+Cette information est importante pour l'interprétation des résultats, car la longueur des textes peut avoir un effet sur la représentation des thèmes. Un roman plus long fournit mécaniquement davantage d'occurrences lexicales et davantage de segments analysables. La segmentation en paquets de phrases vise donc à produire des unités d'analyse plus comparables, tout en conservant suffisamment de contexte pour identifier les thèmes dominants.
 \subsection{Préparation du corpus pour l'analyse thématique}
 
 Pour effectuer l'analyse sur le corpus des romans de Zola, j'ai procedé de la façon qui m'a semblé la plus pertinente pour obtenir des résultats fiables et significatifs. 
@@ -159,6 +209,82 @@ df_phrases = pd.DataFrame(rows)
 \end{lstlisting}
 
 \subsection{Statistiques descriptives du corpus}
+
+\begin{longtable}{p{8cm}r}
+\caption{Nombre de paquets de phrases par roman} \\
+\toprule
+\textbf{Titre du roman} & \textbf{Nombre de paquets} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Titre du roman} & \textbf{Nombre de paquets} \\
+\midrule
+\endhead
+
+La confession de Claude & 65 \\
+Le vœu d'une morte & 60 \\
+Les mystères de Marseille & 184 \\
+Thérèse Raquin & 80 \\
+Madeleine Férat & 124 \\
+La fortune des Rougon & 154 \\
+La curée & 123 \\
+Le ventre de Paris & 136 \\
+La conquête de Plassans & 165 \\
+La faute de l'abbé Mouret & 171 \\
+Son Excellence Eugène Rougon & 191 \\
+L'assommoir & 228 \\
+Une page d'amour & 166 \\
+Nana & 225 \\
+Pot-Bouille & 207 \\
+Au Bonheur des dames & 198 \\
+La joie de vivre & 164 \\
+Germinal & 225 \\
+L'œuvre & 163 \\
+La terre & 222 \\
+Le rêve & 82 \\
+La bête humaine & 154 \\
+L'argent & 155 \\
+La débâcle & 221 \\
+Le docteur Pascal & 135 \\
+Lourdes & 198 \\
+Rome & 231 \\
+Paris & 206 \\
+Fécondité & 259 \\
+Travail & 208 \\
+Vérité & 227 \\
+
+\bottomrule
+\end{longtable}
+
+Ce tableau indique le nombre de paquets de phrases obtenus pour chaque roman après segmentation du corpus. Les écarts observés reflètent principalement les différences de longueur entre les œuvres : les textes les plus courts, comme \textit{Le vœu d'une morte} ou \textit{La confession de Claude}, produisent peu de paquets, tandis que les romans plus volumineux, comme \textit{Fécondité}, \textit{Rome} ou \textit{L'assommoir}, en produisent davantage.
+
+
+\begin{table}[htbp]
+\centering
+\caption{Statistiques descriptives du nombre de paquets par roman}
+\begin{tabular}{lr}
+\toprule
+\textbf{Indicateur} & \textbf{Valeur} \\
+\midrule
+Nombre de romans & 31 \\
+Moyenne & 171.84 \\
+Écart-type & 52.40 \\
+Minimum & 60 \\
+Premier quartile & 145 \\
+Médiane & 171 \\
+Troisième quartile & 214.5 \\
+Maximum & 259 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Le corpus contient en moyenne environ 172 paquets de phrases par roman, avec une médiane très proche de cette valeur, située à 171 paquets. Cette proximité entre moyenne et médiane indique que la distribution n'est pas fortement déséquilibrée, même si les romans présentent des longueurs variables.
+
+L'écart-type est d'environ 52 paquets, ce qui montre une dispersion notable autour de la moyenne. Cette variation reste cependant cohérente avec la nature du corpus, puisque certains romans courts ne produisent qu'une soixantaine de paquets, tandis que les textes les plus longs peuvent en produire jusqu'à 259.
+
+Le coefficient de variation est d'environ 30 \% puisqu'il correspond au rapport entre l'écart-type et la moyenne. Cela indique une variabilité modérée du nombre de paquets entre les œuvres, qu'il faudra garder à l'esprit lors de l'interprétation des résultats thématiques.
 
 \subsection{Lemmatisation du corpus de Zola}
 
