@@ -6,6 +6,7 @@
 \usepackage{booktabs}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{float}
 
 \lstset{
   basicstyle=\ttfamily\small,
@@ -259,8 +260,8 @@ Vérité & 227 \\
 
 Ce tableau indique le nombre de paquets de phrases obtenus pour chaque roman après segmentation du corpus. Les écarts observés reflètent principalement les différences de longueur entre les œuvres : les textes les plus courts, comme \textit{Le vœu d'une morte} ou \textit{La confession de Claude}, produisent peu de paquets, tandis que les romans plus volumineux, comme \textit{Fécondité}, \textit{Rome} ou \textit{L'assommoir}, en produisent davantage.
 
-
-\begin{table}[htbp]
+\subsubsection{Analyse des statistiques descriptives du nombre de paquets par roman}
+\begin{table}[H]
 \centering
 \caption{Statistiques descriptives du nombre de paquets par roman}
 \begin{tabular}{lr}
@@ -280,11 +281,49 @@ Maximum & 259 \\
 \end{table}
 
 
-Le corpus contient en moyenne environ 172 paquets de phrases par roman, avec une médiane très proche de cette valeur, située à 171 paquets. Cette proximité entre moyenne et médiane indique que la distribution n'est pas fortement déséquilibrée, même si les romans présentent des longueurs variables.
+Les statistiques descriptives du nombre de paquets par roman permettent d'évaluer la structure quantitative du corpus après segmentation. Le corpus comprend 31 romans, avec une moyenne d'environ 172 paquets de phrases par œuvre. La médiane, située à 171 paquets, est très proche de cette moyenne. Cette proximité indique que la distribution générale du nombre de paquets n'est pas fortement asymétrique : la majorité des romans se situe autour d'un volume intermédiaire, même si certains textes s'écartent nettement de cette tendance.
 
-L'écart-type est d'environ 52 paquets, ce qui montre une dispersion notable autour de la moyenne. Cette variation reste cependant cohérente avec la nature du corpus, puisque certains romans courts ne produisent qu'une soixantaine de paquets, tandis que les textes les plus longs peuvent en produire jusqu'à 259.
+L'écart-type, d'environ 52 paquets, montre toutefois une dispersion importante autour de la moyenne. Cette variation s'explique principalement par les différences de longueur entre les romans. Les œuvres les plus courtes, comme \textit{Le vœu d'une morte}, produisent seulement 60 paquets, tandis que les textes les plus longs, comme \textit{Fécondité}, atteignent 259 paquets. L'écart entre le minimum et le maximum est donc notable, puisqu'il existe presque un rapport de un à quatre entre le roman le moins segmenté et le roman le plus segmenté.
 
-Le coefficient de variation est d'environ 30 \% puisqu'il correspond au rapport entre l'écart-type et la moyenne. Cela indique une variabilité modérée du nombre de paquets entre les œuvres, qu'il faudra garder à l'esprit lors de l'interprétation des résultats thématiques.
+Les quartiles permettent de préciser cette répartition. Le premier quartile, situé à 145 paquets, indique qu'un quart des romans contient 145 paquets ou moins. Le troisième quartile, situé à 214,5 paquets, indique qu'environ trois quarts des romans restent sous ce seuil. La moitié centrale du corpus se situe donc entre 145 et 214,5 paquets, ce qui montre que la majorité des œuvres conserve une taille relativement comparable après segmentation. Les valeurs extrêmes ne remettent donc pas en cause l'homogénéité générale du corpus, mais elles doivent être prises en compte dans l'interprétation des résultats.
+
+Le coefficient de variation est d'environ 30 \%, puisqu'il correspond au rapport entre l'écart-type et la moyenne. Cette valeur signale une variabilité modérée : les romans ne sont pas tous de taille équivalente, mais les écarts restent attendus pour un corpus littéraire composé d'œuvres publiées à des périodes différentes et appartenant à plusieurs cycles romanesques. Cette dispersion est donc méthodologiquement acceptable, à condition de garder à l'esprit que les romans les plus longs fournissent davantage d'unités d'analyse.
+
+Cette information est importante pour l'analyse thématique. Chaque paquet de phrases constitue une unité soumise aux méthodes de topic modeling. Par conséquent, un roman plus long contribue mécaniquement à un plus grand nombre d'observations qu'un roman court. Les thèmes présents dans les romans volumineux peuvent donc être davantage représentés dans les résultats globaux. La segmentation en paquets de 40 phrases permet néanmoins de réduire cet effet, car elle transforme les romans en unités textuelles comparables, tout en conservant suffisamment de contexte pour identifier des thèmes cohérents.
+
+Ainsi, ces statistiques montrent que le corpus présente un équilibre satisfaisant pour une analyse thématique. Les différences de taille entre les romans existent, mais elles sont documentées et peuvent être intégrées à l'interprétation des résultats. Cette étape descriptive permet donc de mieux contrôler les effets liés à la longueur des œuvres avant l'application des méthodes de NMF et de K-means.
+
+\subsubsection{Analyse des statistiques descriptives du nombre de mot par paquet}
+
+\begin{table}[htbp]
+\centering
+\caption{Statistiques descriptives du nombre de mots par paquet}
+\begin{tabular}{lr}
+\toprule
+\textbf{Indicateur} & \textbf{Valeur} \\
+\midrule
+Nombre de paquets & 5327 \\
+Moyenne & 785.30 \\
+Écart-type & 212.13 \\
+Minimum & 42 \\
+Premier quartile & 636 \\
+Médiane & 753 \\
+Troisième quartile & 902.5 \\
+Maximum & 2944 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Les statistiques descriptives du nombre de mots par paquet permettent d'évaluer la taille effective des unités textuelles utilisées pour l'analyse thématique. Le corpus segmenté comprend 5327 paquets, avec une moyenne d'environ 785 mots par paquet. La médiane, située à 753 mots, est relativement proche de cette moyenne, ce qui indique que la majorité des paquets se situe autour d'un volume textuel comparable.
+
+L'écart-type est d'environ 212 mots, ce qui traduit une dispersion modérée autour de la moyenne. Le coefficient de variation est d'environ 27 \%, puisqu'il correspond au rapport entre l'écart-type et la moyenne. Cette valeur indique que les paquets ne sont pas parfaitement homogènes en longueur, mais que la variabilité reste acceptable pour une analyse thématique. Cette variation s'explique par le fait que les paquets sont construits à partir d'un nombre fixe de phrases, et non d'un nombre fixe de mots : selon le style, le rythme narratif ou la longueur syntaxique des phrases, deux paquets de 40 phrases peuvent contenir un nombre de mots assez différent.
+
+Les quartiles permettent de préciser cette distribution. Un quart des paquets contient au maximum 636 mots, tandis que la moitié des paquets contient au maximum 753 mots. Le troisième quartile, situé à 902,5 mots, indique que 75 \% des paquets ne dépassent pas environ 903 mots. Ainsi, la majorité des unités d'analyse se concentre dans une zone relativement stable, comprise approximativement entre 636 et 903 mots pour la moitié centrale du corpus. Cette concentration est favorable au topic modeling, car elle limite les écarts de taille entre les unités comparées.
+
+Les valeurs extrêmes doivent toutefois être prises en compte. Le paquet le plus court contient seulement 42 mots, tandis que le plus long atteint 2944 mots. Ces deux valeurs indiquent la présence d'unités atypiques. Le paquet de 42 mots correspond probablement à une fin de roman ou à un segment résiduel composé de moins de phrases que les autres. À l'inverse, le paquet de 2944 mots peut provenir d'un passage composé de phrases particulièrement longues ou d'une segmentation imparfaite du texte source. Ces cas extrêmes peuvent influencer l'analyse, car un paquet très long contient davantage d'information lexicale et peut donc peser plus fortement dans la représentation des thèmes.
+
+Dans l'ensemble, ces statistiques montrent que la segmentation en paquets de 40 phrases produit des unités textuelles globalement comparables. Malgré une variabilité réelle, la distribution reste suffisamment concentrée autour de la médiane pour permettre une analyse thématique cohérente. Il serait toutefois pertinent d'examiner les paquets extrêmes afin de vérifier s'ils correspondent à des cas normaux du corpus ou à des problèmes de segmentation.
+
 
 \subsection{Lemmatisation du corpus de Zola}
 
