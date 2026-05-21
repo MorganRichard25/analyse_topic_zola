@@ -23,13 +23,13 @@ Dans cette analyse, nous allons examiner les thèmes récurrents dans les œuvre
 Ce travail est le premier d'une série d'analyses sur un corpus de textes littéraires issues de différents auteurs natuaralistes et non naturalistes.
 
 Deux methode d'analyse ont été utilisées pour identifier les thèmes dans les romans de Zola : 
-\vspace{0,5cm}
+\vspace{0.5cm}
 \begin{itemize}
 \item Le NMF (Non-negative Matrix Factorization)\footnote{N. Gillis, \textit{Nonnegative Matrix Factorization}, Society for Industrial and Applied Mathematics, coll. « Data Science », 2020.} : une technique de réduction de dimensionnalité qui permet d'extraire des thèmes à partir d'un corpus de textes. 
 
 \item Kmeans : une méthode de clustering qui permet de regrouper les thèmes récurrents en fonction de leur similarité thématique.
 \end{itemize}
-\vspace{0,5cm}
+\vspace{0.5cm}
 Ces methodes seront expliquées en détail dans les sections suivantes, où nous présenterons les résultats de l'analyse thématique des romans de Zola.
 
 \vspace{1cm}
@@ -86,7 +86,28 @@ Le corpus comprend les romans suivants :
 \bottomrule
 \end{longtable}
 
-Nons constatons que le corpus de romans est composé de 31 romans, il y a l'intégralité des romans de Zola, 
+Nons constatons que le corpus de romans est composé de 31 romans, il y a l'intégralité des romans de Zola :
+\vspace{0.3cm}
+\begin{itemize}
+    \item 5 : romans antérieurs
+    \item  20 :  Rougon-Macquart
+    \item  3 : Trois Villes
+    \item  3 : Quatre Évangiles publiés
+    
+\end{itemize}
+\vspace{0,3cm}
+Pour ce qui est des Quatres Évangiles, Vérité paraît à titre posthume. Et Justice ne paraîtra jamais, l'ouvrage étant resté à l'état d'ébauche au moment de la mort de l'écrivain. 
+
+\section{Méthodologie de préparation des données}
+
+\subsection{Préparation des données brutes en données propres}
+
+Les romans au format \texttt{.txt} correspondent à des versions nettoyées, c'est-à-dire à des textes dont les éléments non textuels ont été supprimés. Ces éléments comprennent notamment les titres, les chapitres, les notes de bas de page et d'autres informations éditoriales qui pourraient perturber l'analyse. Ce nettoyage permet d'obtenir une représentation plus précise des thèmes présents dans les romans.
+
+De plus, le choix a été fait de conserver une seule phrase par ligne. Ce format facilite l'analyse textuelle, notamment pour les méthodes de NMF et de K-means, qui nécessitent une structure de données homogène pour fonctionner correctement.
+
+Cette logique de formatage a également été appliquée en prévision des analyses futures. Les romans issus de prochains traitements pourront ainsi être intégrés de manière cohérente au corpus. Ce choix permet de limiter les différences de structure entre les fichiers et d'obtenir un format homogène pour l'analyse.
+
 
 
 \end{document}
