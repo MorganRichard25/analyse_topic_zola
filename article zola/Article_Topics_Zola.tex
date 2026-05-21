@@ -31,24 +31,24 @@
 
 Émile Zola, l'un des écrivains les plus célèbres du XIXe siècle, est connu pour ses romans naturalistes qui explorent les aspects sociaux, économiques et psychologiques de la vie humaine. 
 
-Dans cette analyse, nous allons examiner les thèmes récurrents dans les œuvres de Zola et savoir s'il y a bien des thèmes recurent dans plusieurs de ses romans. Des methode d'analyse textuelle seront utilisées pour identifier les thèmes principaux à travers les différents romans.
+Dans cette analyse, nous allons examiner les thèmes récurrents dans les œuvres de Zola et déterminer s'ils apparaissent dans plusieurs de ses romans. Des méthodes d'analyse textuelle seront utilisées pour identifier les thèmes principaux à travers les différents romans.
 
-Ce travail est le premier d'une série d'analyses sur un corpus de textes littéraires issues de différents auteurs natuaralistes et non naturalistes.
+Ce travail est le premier d'une série d'analyses portant sur un corpus de textes littéraires issus de différents auteurs naturalistes et non naturalistes.
 
-Deux methode d'analyse ont été utilisées pour identifier les thèmes dans les romans de Zola : 
+Deux méthodes d'analyse ont été utilisées pour identifier les thèmes dans les romans de Zola : 
 \vspace{0.5cm}
 \begin{itemize}
 \item Le NMF (Non-negative Matrix Factorization)\footnote{N. Gillis, \textit{Nonnegative Matrix Factorization}, Society for Industrial and Applied Mathematics, coll. « Data Science », 2020.} : une technique de réduction de dimensionnalité qui permet d'extraire des thèmes à partir d'un corpus de textes. 
 
-\item Kmeans : une méthode de clustering qui permet de regrouper les thèmes récurrents en fonction de leur similarité thématique.
+\item K-means : une méthode de clustering qui permet de regrouper les thèmes récurrents en fonction de leur similarité thématique.
 \end{itemize}
 \vspace{0.5cm}
-Ces methodes seront expliquées en détail dans les sections suivantes, où nous présenterons les résultats de l'analyse thématique des romans de Zola.
+Ces méthodes seront expliquées en détail dans les sections suivantes, où nous présenterons les résultats de l'analyse thématique des romans de Zola.
 
 \vspace{1cm}
 \section{Présentation du corpus}
 
-Comme dit en introduction, ce travail porte sur un corpus de textes de Zola. Un Choix a été fait de n'inclure que ces romans pour cette analyse, afin de se concentrer sur les thèmes récurrents dans l'œuvre de cet auteur. Aucune nouvelles n'a été utilisée pour cette analyse, car les romans de Zola sont plus longs et offrent une richesse thématique plus importante que les nouvelles, de plus il peut y avoir un déséquible entre ces deux types de textes, cela pourrait fausser les résultats de l'analyse thématique.
+Comme indiqué en introduction, ce travail porte sur un corpus de textes de Zola. Le choix a été fait de n'inclure que ses romans dans cette analyse, afin de se concentrer sur les thèmes récurrents dans l'œuvre de cet auteur. Aucune nouvelle n'a été utilisée pour cette analyse, car les romans de Zola sont plus longs et offrent une richesse thématique plus importante que les nouvelles. De plus, un déséquilibre entre ces deux types de textes pourrait fausser les résultats de l'analyse thématique.
 
 Le corpus comprend les romans suivants :
 
@@ -99,17 +99,17 @@ Le corpus comprend les romans suivants :
 \bottomrule
 \end{longtable}
 
-Nons constatons que le corpus de romans est composé de 31 romans, il y a l'intégralité des romans de Zola :
+Nous constatons que le corpus est composé de 31 romans, correspondant aux principaux romans publiés de Zola :
 \vspace{0.3cm}
 \begin{itemize}
-    \item 5 : romans antérieurs
+    \item 5 : romans antérieurs aux \textit{Rougon-Macquart}
     \item  20 :  Rougon-Macquart
     \item  3 : Trois Villes
     \item  3 : Quatre Évangiles publiés
     
 \end{itemize}
-\vspace{0,3cm}
-Pour ce qui est des Quatres Évangiles, Vérité paraît à titre posthume. Et Justice ne paraîtra jamais, l'ouvrage étant resté à l'état d'ébauche au moment de la mort de l'écrivain. 
+\vspace{0.3cm}
+Pour ce qui est des \textit{Quatre Évangiles}, \textit{Vérité} paraît à titre posthume. \textit{Justice} ne paraîtra jamais, l'ouvrage étant resté à l'état d'ébauche au moment de la mort de l'écrivain. 
 
 \section{Méthodologie de préparation des données}
 
@@ -173,9 +173,9 @@ Le tableau fournit une description quantitative du corpus en indiquant, pour cha
 Cette information est importante pour l'interprétation des résultats, car la longueur des textes peut avoir un effet sur la représentation des thèmes. Un roman plus long fournit mécaniquement davantage d'occurrences lexicales et davantage de segments analysables. La segmentation en paquets de phrases vise donc à produire des unités d'analyse plus comparables, tout en conservant suffisamment de contexte pour identifier les thèmes dominants.
 \subsection{Préparation du corpus pour l'analyse thématique}
 
-Pour effectuer l'analyse sur le corpus des romans de Zola, j'ai procedé de la façon qui m'a semblé la plus pertinente pour obtenir des résultats fiables et significatifs. 
+Pour effectuer l'analyse sur le corpus des romans de Zola, nous avons procédé de la façon qui semblait la plus pertinente pour obtenir des résultats fiables et significatifs. 
 
-J'ai segmenté les romans en paquets de phrases. Les paquets etaient composés de 40 phrases, ce qui correspond à une taille de texte suffisante pour capturer les thèmes présents dans les romans, tout en permettant une analyse thématique plus fine. Bien entendu, ce choix de taille de paquet est arbitraire et pourrait être ajusté en fonction des besoins de l'analyse. Plusieurs tailles de paquets on etaient testées\footnote{J'ai procédé à differents testes, des paquets de 10 phrases, 50, 70 et 100} et des paquets 40 phrases ont été retenues car elles permettent d'obtenir des résultats plus cohérents et significatifs que les autres tailles testées. Ce choix releve d'un arbitrage méthodologique fondé sur des essais empirique et une analyse qualitative des résultats obtenus avec différentes tailles de paquets.
+Les romans ont été segmentés en paquets de phrases. Les paquets étaient composés de 40 phrases, ce qui correspond à une taille de texte suffisante pour capturer les thèmes présents dans les romans, tout en permettant une analyse thématique plus fine. Bien entendu, ce choix de taille de paquet est arbitraire et pourrait être ajusté en fonction des besoins de l'analyse. Plusieurs tailles de paquets ont été testées\footnote{Différents essais ont été réalisés avec des paquets de 10, 50, 70 et 100 phrases.} et les paquets de 40 phrases ont été retenus, car ils permettent d'obtenir des résultats plus cohérents et significatifs que les autres tailles testées. Ce choix relève d'un arbitrage méthodologique fondé sur des essais empiriques et sur une analyse qualitative des résultats obtenus avec différentes tailles de paquets.
 
 
 \vspace{0.3cm}
@@ -293,9 +293,9 @@ Cette information est importante pour l'analyse thématique. Chaque paquet de ph
 
 Ainsi, ces statistiques montrent que le corpus présente un équilibre satisfaisant pour une analyse thématique. Les différences de taille entre les romans existent, mais elles sont documentées et peuvent être intégrées à l'interprétation des résultats. Cette étape descriptive permet donc de mieux contrôler les effets liés à la longueur des œuvres avant l'application des méthodes de NMF et de K-means.
 
-\subsubsection{Analyse des statistiques descriptives du nombre de mot par paquet}
+\subsubsection{Analyse des statistiques descriptives du nombre de mots par paquet}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Statistiques descriptives du nombre de mots par paquet}
 \begin{tabular}{lr}
