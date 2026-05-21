@@ -1,4 +1,9 @@
 \documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{longtable}
+\usepackage{booktabs}
 
 \title{Analyse des thèmes dans les romans de Zola}
 \author{Morgan RICHARD}
@@ -10,7 +15,78 @@
 \maketitle
 
 \section{Introduction}
-Émile Zola, l'un des écrivains les plus célèbres du XIXe siècle, est connu pour ses romans naturalistes qui explorent les aspects sociaux, économiques et psychologiques de la vie humaine. Dans cette analyse, nous allons examiner les thèmes récurrents dans les œuvres de Zola. Des methode s d'analyse textuelle seront utilisées pour identifier les thèmes principaux à travers les différents romans.
 
-Ce travail est le pre
+Émile Zola, l'un des écrivains les plus célèbres du XIXe siècle, est connu pour ses romans naturalistes qui explorent les aspects sociaux, économiques et psychologiques de la vie humaine. 
+
+Dans cette analyse, nous allons examiner les thèmes récurrents dans les œuvres de Zola et savoir s'il y a bien des thèmes recurent dans plusieurs de ses romans. Des methode d'analyse textuelle seront utilisées pour identifier les thèmes principaux à travers les différents romans.
+
+Ce travail est le premier d'une série d'analyses sur un corpus de textes littéraires issues de différents auteurs natuaralistes et non naturalistes.
+
+Deux methode d'analyse ont été utilisées pour identifier les thèmes dans les romans de Zola : 
+\vspace{0,5cm}
+\begin{itemize}
+\item Le NMF (Non-negative Matrix Factorization)\footnote{N. Gillis, \textit{Nonnegative Matrix Factorization}, Society for Industrial and Applied Mathematics, coll. « Data Science », 2020.} : une technique de réduction de dimensionnalité qui permet d'extraire des thèmes à partir d'un corpus de textes. 
+
+\item Kmeans : une méthode de clustering qui permet de regrouper les thèmes récurrents en fonction de leur similarité thématique.
+\end{itemize}
+\vspace{0,5cm}
+Ces methodes seront expliquées en détail dans les sections suivantes, où nous présenterons les résultats de l'analyse thématique des romans de Zola.
+
+\vspace{1cm}
+\section{Présentation du corpus}
+
+Comme dit en introduction, ce travail porte sur un corpus de textes de Zola. Un Choix a été fait de n'inclure que ces romans pour cette analyse, afin de se concentrer sur les thèmes récurrents dans l'œuvre de cet auteur. Aucune nouvelles n'a été utilisée pour cette analyse, car les romans de Zola sont plus longs et offrent une richesse thématique plus importante que les nouvelles, de plus il peut y avoir un déséquible entre ces deux types de textes, cela pourrait fausser les résultats de l'analyse thématique.
+
+Le corpus comprend les romans suivants :
+
+\begin{longtable}{lll}
+\caption{Corpus des œuvres de Zola utilisées dans l'analyse}\\
+\toprule
+\textbf{Date} & \textbf{Titre} & \textbf{Fichier} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Date} & \textbf{Titre} & \textbf{Fichier} \\
+\midrule
+\endhead
+
+1865 & La confession de Claude & \texttt{1865\_La\_confession\_de\_Claude.\_clean.txt} \\
+1866 & Le vœu d'une morte & \texttt{1866\_Le\_voeu\_d\_une\_morte.\_clean.txt} \\
+1867 & Les mystères de Marseille & \texttt{1867\_Les\_mysteres\_de\_Marseille.\_clean.txt} \\
+1867 & Thérèse Raquin & \texttt{1867\_Therese\_Raquin.\_clean.txt} \\
+1868 & Madeleine Férat & \texttt{1868\_Madeleine\_Ferat.\_clean.txt} \\
+1871 & La fortune des Rougon & \texttt{1871\_1\_La\_fortune\_des\_Rougon.\_clean.txt} \\
+1872 & La curée & \texttt{1871\_2\_La\_curee.\_clean.txt} \\
+1873 & Le ventre de Paris & \texttt{1873\_3\_Le\_ventre\_de\_Paris.\_clean.txt} \\
+1874 & La conquête de Plassans & \texttt{1874\_4\_La\_conquete\_de\_Plassans.\_clean.txt} \\
+1875 & La faute de l'abbé Mouret & \texttt{1875\_5\_La\_faute\_de\_l\_abbe\_Mouret.\_clean.txt} \\
+1876 & Son Excellence Eugène Rougon & \texttt{1876\_6\_Son\_Excellence\_Eugene\_Rougon.\_clean.txt} \\
+1877 & L'assommoir & \texttt{1877\_7\_L\_assommoir.\_clean.txt} \\
+1878 & Une page d'amour & \texttt{1878\_8\_Une\_page\_d\_amour.\_clean.txt} \\
+1880 & Nana & \texttt{1880\_9\_Nana.\_clean.txt} \\
+1882 & Pot-Bouille & \texttt{1882\_10\_Pot-bouille.\_clean.txt} \\
+1883 & Au Bonheur des dames & \texttt{1883\_11\_Au\_Bonheur\_des\_dames.\_clean.txt} \\
+1884 & La joie de vivre & \texttt{1884\_12\_La\_joie\_de\_vivre.\_clean.txt} \\
+1885 & Germinal & \texttt{1885\_13\_Germinal.\_clean.txt} \\
+1886 & L'œuvre & \texttt{1886\_14\_L\_oeuvre.\_clean.txt} \\
+1887 & La terre & \texttt{1887\_15\_La\_terre.\_clean.txt} \\
+1888 & Le rêve & \texttt{1888\_16\_Le\_reve.\_clean.txt} \\
+1890 & La bête humaine & \texttt{1890\_17\_La\_bete\_humaine.\_clean.txt} \\
+1891 & L'argent & \texttt{1891\_18\_L\_argent.\_clean.txt} \\
+1892 & La débâcle & \texttt{1892\_19\_La\_debacle.\_clean.txt} \\
+1893 & Le docteur Pascal & \texttt{1893\_20\_Le\_docteur\_Pascal.\_clean.txt} \\
+1894 & Lourdes & \texttt{1894\_1\_Lourdes.\_clean.txt} \\
+1896 & Rome & \texttt{1896\_2\_Rome.\_clean.txt} \\
+1898 & Paris & \texttt{1898\_3\_Paris.\_clean.txt} \\
+1899 & Fécondité & \texttt{1899\_1\_Fecondite.\_clean.txt} \\
+1901 & Travail & \texttt{1901\_2\_Travail.\_clean.txt} \\
+1903 & Vérité & \texttt{1903\_3\_Verite.\_clean.txt} \\
+
+\bottomrule
+\end{longtable}
+
+Nons constatons que le corpus de romans est composé de 31 romans, il y a l'intégralité des romans de Zola, 
+
+
 \end{document}
