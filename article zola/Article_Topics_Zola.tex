@@ -4,6 +4,18 @@
 \usepackage[french]{babel}
 \usepackage{longtable}
 \usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  captionpos=b
+  showstringspaces=false
+}
 
 \title{Analyse des thèmes dans les romans de Zola}
 \author{Morgan RICHARD}
@@ -106,8 +118,48 @@ Les romans au format \texttt{.txt} correspondent à des versions nettoyées, c'e
 
 De plus, le choix a été fait de conserver une seule phrase par ligne. Ce format facilite l'analyse textuelle, notamment pour les méthodes de NMF et de K-means, qui nécessitent une structure de données homogène pour fonctionner correctement.
 
-Cette logique de formatage a également été appliquée en prévision des analyses futures. Les romans issus de prochains traitements pourront ainsi être intégrés de manière cohérente au corpus. Ce choix permet de limiter les différences de structure entre les fichiers et d'obtenir un format homogène pour l'analyse.
+Cette logique de formatage a également été appliquée en prévision des analyses futures. Les romans issus de prochains traitements pourront ainsi être intégrés de manière cohérente au corpus. Ce choix permet de limiter les différences de structure entre les fichiers et d'obtenir un format homogène pour l'analyse sans trop complexifier le processus de préparation des données.
+
+\subsection{Préparation du corpus pour l'analyse thématique}
+
+Pour effectuer l'analyse sur le corpus des romans de Zola, j'ai procedé de la façon qui m'a semblé la plus pertinente pour obtenir des résultats fiables et significatifs. 
+
+J'ai segmenté les romans en paquets de phrases. Les paquets etaient composés de 40 phrases, ce qui correspond à une taille de texte suffisante pour capturer les thèmes présents dans les romans, tout en permettant une analyse thématique plus fine. Bien entendu, ce choix de taille de paquet est arbitraire et pourrait être ajusté en fonction des besoins de l'analyse. Plusieurs tailles de paquets on etaient testées\footnote{J'ai procédé à differents testes, des paquets de 10 phrases, 50, 70 et 100} et des paquets 40 phrases ont été retenues car elles permettent d'obtenir des résultats plus cohérents et significatifs que les autres tailles testées. Ce choix releve d'un arbitrage méthodologique fondé sur des essais empirique et une analyse qualitative des résultats obtenus avec différentes tailles de paquets.
 
 
+\vspace{0.3cm}
+Le code suivant permet de segmenter les romans en paquets de 40 phrases.
+\vspace{0.3cm}
+\begin{lstlisting}[language=Python, caption={Code de segmentation du texte en paquets de phrases}]
+def segmenter_en_paquets(texte, taille_paquet=40):
+    # Segmente le texte en paquets de phrases
+    phrases = texte.splitlines()
+    phrases = [p.strip() for p in phrases if p.strip()]
+    paquets = []
+
+    for i in range(0, len(phrases), taille_paquet):
+        paquet = " ".join(phrases[i:i+taille_paquet])
+        paquets.append(paquet)
+    return paquets
+
+rows = []
+
+for _, row in df.iterrows():
+    # Iteration sur chaque ligne du DataFrame
+    paquets = segmenter_en_paquets(row["texte_brut"])
+
+    for idx, paquet in enumerate(paquets):
+        rows.append({
+            "nom_fichier": row["nom_fichier"],
+            "id_paquet": idx,
+            "phrases_paquet": paquet
+        })
+
+df_phrases = pd.DataFrame(rows)
+\end{lstlisting}
+
+\subsection{Statistiques descriptives du corpus}
+
+\subsection{Lemmatisation du corpus de Zola}
 
 \end{document}
