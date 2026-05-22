@@ -9,8 +9,11 @@
 \usepackage{float}
 
 \lstset{
-  basicstyle=\ttfamily\small,
+  basicstyle=\ttfamily\footnotesize,
   breaklines=true,
+  breakatwhitespace=true,
+  columns=fullflexible,
+  keepspaces=true,
   frame=single,
   numbers=left,
   numberstyle=\tiny,
@@ -45,7 +48,7 @@ Deux méthodes d'analyse ont été utilisées pour identifier les thèmes dans l
 \vspace{0.5cm}
 Ces méthodes seront expliquées en détail dans les sections suivantes, où nous présenterons les résultats de l'analyse thématique des romans de Zola.
 
-\vspace{1cm}
+\newpage
 \section{Présentation du corpus}
 
 Comme indiqué en introduction, ce travail porte sur un corpus de textes de Zola. Le choix a été fait de n'inclure que ses romans dans cette analyse, afin de se concentrer sur les thèmes récurrents dans l'œuvre de cet auteur. Aucune nouvelle n'a été utilisée pour cette analyse, car les romans de Zola sont plus longs et offrent une richesse thématique plus importante que les nouvelles. De plus, un déséquilibre entre ces deux types de textes pourrait fausser les résultats de l'analyse thématique.
@@ -110,7 +113,7 @@ Nous constatons que le corpus est composé de 31 romans, correspondant aux princ
 \end{itemize}
 \vspace{0.3cm}
 Pour ce qui est des \textit{Quatre Évangiles}, \textit{Vérité} paraît à titre posthume. \textit{Justice} ne paraîtra jamais, l'ouvrage étant resté à l'état d'ébauche au moment de la mort de l'écrivain. 
-
+\newpage
 \section{Méthodologie de préparation des données}
 
 \subsection{Préparation des données brutes en données propres}
@@ -326,5 +329,58 @@ Dans l'ensemble, ces statistiques montrent que la segmentation en paquets de 40 
 
 
 \subsection{Lemmatisation du corpus de Zola}
+
+Après avoir obtenu un corpus segmenté en paquets de phrases et relativement homogène en termes de nombre de mots, la prochaine étape de préparation des données a consisté à effectuer une lemmatisation du corpus.
+
+Pour réaliser cette lemmatisation, nous avons utilisé la bibliothèque \texttt{spaCy} en Python, qui offre des outils performants pour le traitement automatique du langage. La lemmatisation permet de regrouper les différentes formes d'un même mot sous une seule forme de base : par exemple, les mots « manger », « mange » et « manges » sont tous réduits au lemme « manger ». Cette étape facilite l'identification des thèmes et contribue à réduire la dimensionnalité du corpus.
+
+Comme pour la segmentation en paquets de phrases, plusieurs essais ont été réalisés avec la bibliothèque de lemmatisation \texttt{spaCy}.
+
+\begin{lstlisting}[language=Python, caption={Importation du modèle français de spaCy}]
+nlp = spacy.load("fr_core_news_lg", disable=["ner", "parser"])
+# Chargement du modele de langue francaise de spaCy.
+# Les composants de reconnaissance des entites nommees et d'analyse
+# syntaxique sont desactives afin d'accelerer le traitement.
+
+nlp.max_length = 2_000_000
+# Augmentation de la longueur maximale des textes traites par spaCy.
+# Cette valeur est ajustable selon la taille des textes et la memoire
+# disponible sur la machine.
+\end{lstlisting}
+
+Nous avons choisi d'utiliser le modèle \texttt{fr\_core\_news\_lg} de spaCy, qui est un modèle de langue française de grande taille. Ce choix a été motivé par la richesse lexicale et la complexité syntaxique des romans de Zola, qui nécessitent un modèle capable de gérer une grande variété de formes linguistiques. Le modèle \texttt{fr\_core\_news\_lg} a été retenu car il offre une lemmatisation plus précise que des modèles plus légers\footnote{Les modèles \texttt{fr\_core\_news\_sm} et \texttt{fr\_core\_news\_md} ont également été envisagés.}, ce qui est important pour l'identification des thèmes dans les textes littéraires.
+
+
+Une liste de mots à exclure a été construite progressivement au cours de plusieurs itérations de prétraitement\footnote{Elle est présente en annexe du document.}. Elle résulte de l'observation conjointe des sorties de lemmatisation et de la matrice terme-document. L'objectif était d'identifier les formes lexicales très fréquentes dans le corpus, mais peu discriminantes pour l'analyse thématique.
+
+Cette liste contient d'abord des mots-outils, tels que les pronoms personnels, les conjonctions, les déterminants et les prépositions. Ces termes structurent grammaticalement les phrases, mais ils ne permettent pas d'identifier les thèmes dominants des romans. Leur présence importante dans la matrice terme-document risquait donc de réduire la lisibilité des topics produits par la NMF.
+
+La liste a également été enrichie par l'ajout de certains noms propres, notamment des noms de personnages récurrents dans les romans de Zola. Ces noms apparaissent fréquemment dans les textes, mais leur poids lexical tendait à orienter les topics vers des personnages plutôt que vers des thèmes plus généraux, comme le travail, la famille, la religion, l'argent ou les rapports sociaux. Leur exclusion permet donc de privilégier une interprétation thématique plutôt qu'une simple identification des protagonistes.
+
+Ce filtrage relève d'un choix méthodologique empirique. Lors des premiers essais, plusieurs mots restaient fortement représentés dans les résultats malgré les paramètres appliqués au lemmatiseur et au vectoriseur. La liste d'exclusion a donc été ajustée à partir de l'examen des termes les plus fréquents et des premiers topics obtenus. Elle vise à améliorer la qualité interprétative de la matrice terme-document en conservant prioritairement les mots porteurs d'information thématique.
+
+\begin{lstlisting}[language=Python, caption={Fonction de lemmatisation avec exclusion de mots spécifiques}]
+
+def nettoyer_texte(texte):
+    """Nettoie et lemmatise un texte avec spaCy."""
+    doc = nlp(texte)
+    tokens = []
+
+    for token in doc:
+        lemme = token.lemma_.lower()
+
+        if (
+            not token.is_stop
+            and not token.is_punct
+            and not token.like_num
+            and not token.is_space
+            and token.pos_ in {"NOUN", "ADJ"}
+            and len(lemme) > 2
+            and lemme not in stop_word
+        ):
+            tokens.append(lemme)
+
+    return " ".join(tokens)
+\end{lstlisting}
 
 \end{document}
