@@ -395,18 +395,13 @@ Le NMF est une technique de réduction de dimensionnalité qui permet d'extraire
 
 C'est la premiere des dux méthodes que j'ai utilisé pour identifier les thèmes dans les romans de Zola.
 
-J'ai 
-
-
-
-
 Après la préparation du corpus, la segmentation en paquets de phrases et la lemmatisation des textes, l'étape suivante consiste à appliquer une méthode de modélisation thématique. L'objectif est d'identifier automatiquement les grands thèmes présents dans les romans de Zola, à partir des termes les plus représentatifs de chaque segment textuel.
 
 Dans cette analyse, la méthode retenue est la NMF, pour \textit{Non-negative Matrix Factorization}. Cette méthode permet de décomposer une matrice terme-document en deux matrices plus simples : une matrice associant les segments de texte aux topics, et une matrice associant les topics aux termes les plus caractéristiques. La NMF est particulièrement adaptée à ce type d'analyse, car elle produit des résultats relativement interprétables : chaque topic peut être compris comme un ensemble de mots fortement associés entre eux.
 
 \subsubsection{Création de la matrice terme-document}
 
-La première étape consiste à transformer les textes lemmatisés en une représentation numérique exploitable par le modèle. Pour cela, une matrice terme-document a été construite à l'aide d'une pondération TF-IDF. Cette méthode permet de donner un poids plus important aux termes caractéristiques d'un segment, tout en réduisant l'influence des mots trop fréquents dans l'ensemble du corpus.
+La première étape consiste à transformer les textes lemmatisés en une représentation numérique exploitable par le modèle. Pour cela, une matrice terme-document a été construite à l'aide d'une pondération TF-IDF\footnote{Utilisé via la biblothèque de scikit learn}. Cette méthode permet de donner un poids plus important aux termes caractéristiques d'un segment, tout en réduisant l'influence des mots trop fréquents dans l'ensemble du corpus.
 
 Le vectoriseur utilisé est défini de la manière suivante :
 
@@ -415,13 +410,12 @@ vectorizer = TfidfVectorizer(
     min_df=3,
     max_df=0.8
 )
-
 X = vectorizer.fit_transform(df["phrases_lemm"])
 \end{lstlisting}
 
 Les paramètres \texttt{min\_df} et \texttt{max\_df} jouent un rôle important dans la qualité de la matrice obtenue. Le paramètre \texttt{min\_df=3} permet d'exclure les mots qui apparaissent dans moins de trois segments. Ces mots sont généralement trop rares pour contribuer efficacement à l'identification de thèmes récurrents. À l'inverse, le paramètre \texttt{max\_df=0.8} exclut les termes présents dans plus de 80 \% des segments, car ils sont trop fréquents pour être réellement discriminants.
 
-Ce choix relève d'un arbitrage méthodologique. Plusieurs valeurs ont été testées, puis évaluées à partir de la qualité des mots conservés et de la cohérence des premiers topics obtenus. L'objectif n'était donc pas seulement de réduire la taille de la matrice, mais surtout de conserver les termes les plus utiles pour l'analyse thématique. La matrice finale sert ensuite de base à l'application du modèle NMF.
+Ce choix relève d'un arbitrage méthodologique. Plusieurs combinaison ont été testées, puis évaluées à partir de la qualité des mots conservés et de la cohérence des premiers topics obtenus. L'objectif n'était donc pas seulement de réduire la taille de la matrice, mais surtout de conserver les termes les plus utiles pour l'analyse thématique. La matrice finale sert ensuite de base à l'application du modèle NMF.
 
 \subsubsection{Choix du nombre de topics}
 
@@ -451,7 +445,7 @@ Le choix du nombre de topics a donc été complété par une analyse qualitative
 
 \subsubsection{Paramétrage du modèle NMF}
 
-Après plusieurs essais, le modèle final a été construit avec 29 topics. Cette valeur a été retenue car elle permettait d'obtenir un niveau de détail suffisant, sans produire une fragmentation trop importante des thèmes. Les topics obtenus correspondent à des ensembles thématiques distincts, comme le monde ouvrier, la religion, la famille, la finance, la guerre, le commerce, la médecine ou encore l'espace domestique.
+Après plusieurs essais, le modèle final a été construit avec 29 topics. Cette valeur a été retenue car elle permettait d'obtenir un niveau de détail suffisant, sans produire une fragmentation trop importante des thèmes (le bruit). Les topics obtenus correspondent à des ensembles thématiques distincts, comme le monde ouvrier, la religion, la famille, la finance, la guerre, le commerce, la médecine ou encore l'espace domestique comme nous allons le voir dans la section d'interprétation des résultats.
 
 Le modèle final est défini de la manière suivante :
 
@@ -468,7 +462,7 @@ W = nmf.fit_transform(X)
 H = nmf.components_
 \end{lstlisting}
 
-Le paramètre \texttt{n\_components=29} correspond au nombre de topics recherchés. Le paramètre \texttt{random\_state=42} permet d'assurer la reproductibilité des résultats. L'initialisation \texttt{nndsvda} est adaptée à la NMF, car elle fournit une initialisation stable à partir de la structure de la matrice. Le solveur \texttt{cd}, pour \textit{coordinate descent}, est utilisé pour optimiser la factorisation.
+Le paramètre \texttt{n\_components=29} correspond au nombre de topics recherchés. Le paramètre \texttt{random\_state=42} permet d'assurer la reproductibilité des résultats. L'initialisation \texttt{nndsvda}\footnote{NNDSVD with zeros filled with the average of X (better when sparsity is not desired) https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html } est adaptée à la NMF, car elle fournit une initialisation stable à partir de la structure de la matrice. Le solveur \texttt{cd}, pour \textit{coordinate descent}, est utilisé pour optimiser la factorisation.
 
 La matrice \texttt{W} contient les poids des topics pour chaque segment du corpus. Autrement dit, elle indique dans quelle mesure chaque segment est associé à chacun des 29 topics. La matrice \texttt{H}, quant à elle, contient les poids des mots pour chaque topic. Elle permet donc d'identifier les termes les plus représentatifs de chaque thème.
 
@@ -506,7 +500,7 @@ df["poids_topic"] = W_norm.max(axis=1)
 
 La colonne \texttt{topic\_dominant} indique le topic le plus représenté dans chaque paquet de phrases. La colonne \texttt{poids\_topic} mesure l'intensité de cette association. Plus cette valeur est élevée, plus le segment est clairement associé à un topic spécifique. À l'inverse, un poids faible peut indiquer un segment plus mixte, contenant plusieurs thèmes ou ne correspondant fortement à aucun topic.
 
-Cette étape permet de passer d'une simple liste de topics à une analyse plus structurée de leur répartition dans le corpus. Elle rend possible l'étude du nombre de segments associés à chaque topic, du poids moyen des topics dans l'ensemble du corpus et de la présence des thèmes selon les romans.
+Cette étape permet de passer d'une simple liste de topics à une analyse plus structurée de leur répartition dans le corpus. Elle rend possible l'étude du nombre de segments associés à chaque topic, du poids moyen des topics dans l'ensemble du corpus et de la présence des thèmes selon les romans. Et par la suite de passer un detecteur de mofifs sur les segments associés à chaque topic afin d'identifier les motifs narratifs les plus caractéristiques de chaque thème.
 
 \subsubsection{Nommer les topics}
 
@@ -550,62 +544,21 @@ noms_topics_nmf = {
 
 Cette étape montre que l’analyse ne repose pas uniquement sur une extraction automatique. Le modèle propose des regroupements de mots, mais leur interprétation dépend d’un travail humain. Les noms attribués aux topics doivent donc être compris comme des catégories d’analyse construites à partir des résultats du modèle, et non comme des vérités objectives produites automatiquement par l’algorithme.
 
-\subsubsection{Analyse de la répartition des topics}
-
-Une fois les topics nommés, plusieurs visualisations ont été produites afin d’étudier leur répartition dans le corpus. La première consiste à compter le nombre de segments associés à chaque topic dominant. Cette représentation permet d’identifier les thèmes les plus présents dans l’ensemble du corpus.
-
-\begin{lstlisting}[language=Python, caption={Nombre de segments par topic dominant}]
-nb_segments = df[“topic_dominant”].value_counts().sort_index()
-
-plt.figure(figsize=(10, 6))
-nb_segments.plot(kind=“bar”)
-
-plt.title(“Nombre de segments par topic dominant”)
-plt.xlabel(“Topic dominant”)
-plt.ylabel(“Nombre de segments”)
-plt.show()
-\end{lstlisting}
-
-Une seconde visualisation consiste à calculer le poids moyen de chaque topic dans l’ensemble du corpus. Cette mesure est complémentaire du topic dominant, car elle ne se limite pas au thème principal de chaque segment. Elle permet d’observer la présence globale des topics, même lorsqu’ils ne sont pas dominants.
-
-\begin{lstlisting}[language=Python, caption={Poids moyen des topics NMF dans le corpus}]
-topic_weights = W.mean(axis=0)
-
-plt.figure(figsize=(10, 6))
-plt.bar(range(1, len(topic_weights) + 1), topic_weights)
-
-plt.title(“Poids moyen des topics NMF dans le corpus”)
-plt.xlabel(“Topic”)
-plt.ylabel(“Poids moyen”)
-plt.show()
-\end{lstlisting}
-
-Enfin, une matrice des poids moyens des topics par œuvre a été construite. Elle permet d’observer quels topics sont particulièrement représentés dans certains romans. Cette analyse est importante, car certains thèmes peuvent être fortement associés à une œuvre précise, tandis que d’autres apparaissent de façon plus transversale dans l’ensemble du corpus.
-
-\begin{lstlisting}[language=Python, caption={Poids moyen des topics NMF par œuvre}]
-topics_df = pd.DataFrame(
-W,
-columns=[f”Topic {i+1}” for i in range(W.shape[1])]
-)
-
-topics_df[“nom_fichier”] = df[“nom_fichier”].values
-table_topics = topics_df.groupby(“nom_fichier”).mean()
-\end{lstlisting}
-
-Cette représentation permet de passer d’une analyse globale du corpus à une lecture plus fine, roman par roman. Elle peut notamment servir à repérer les thèmes les plus caractéristiques de certaines œuvres : la mine dans \textit{Germinal}, la finance dans \textit{L’Argent}, le commerce dans \textit{Au Bonheur des dames}, la guerre dans \textit{La Débâcle}, ou encore la religion dans les romans du cycle des \textit{Trois Villes}.
 
 \subsubsection{Limites de l’approche}
 
-L’utilisation de la NMF présente plusieurs avantages, notamment sa lisibilité et sa capacité à produire des topics relativement interprétables. Cependant, cette méthode comporte aussi des limites. Le choix du nombre de topics reste en partie subjectif, surtout lorsque la méthode du coude ne permet pas d’identifier une valeur optimale claire. Dans cette analyse, le choix de 29 topics repose donc sur un compromis entre précision, lisibilité et cohérence interprétative.
+L’utilisation de la NMF présente plusieurs avantages, notamment sa lisibilité et sa capacité à produire des topics relativement interprétables. Cependant, cette méthode comporte aussi des limites. Le choix du nombre de topics reste en partie subjectif, surtout lorsque la méthode du coude ne permet pas d’identifier une valeur optimale claire. Dans cette analyse, le choix de 29 topics repose donc sur un compromis entre précision, lisibilité et cohérence interprétative. La validation humaine des resultats est donc essentielle pour s'assurer que les topics produits correspondent à des thèmes réels et pertinents dans l'œuvre de Zola.
 
-De plus, les noms attribués aux topics résultent d’une interprétation humaine. Deux personnes pourraient parfois proposer des intitulés légèrement différents pour un même groupe de mots. Il est donc important de considérer ces noms comme des outils d’analyse, et non comme des catégories fixes ou définitives.
+De plus, les noms attribués aux topics résultent encore une fois d’une interprétation humaine. Deux personnes pourraient parfois proposer des intitulés légèrement différents pour un même groupe de mots. Il est donc important de considérer ces noms comme des outils d’analyse, et non comme des catégories fixes ou définitives. Cette subjectivité ne remet pas en cause la validité de l’analyse, mais elle souligne l’importance d’une approche critique et réflexive dans l’interprétation des résultats.
 
-Enfin, les résultats dépendent fortement des choix effectués en amont : nettoyage du texte, lemmatisation, liste de mots à exclure, taille des segments, paramètres du vectoriseur et nombre de topics. La modélisation thématique ne doit donc pas être comprise comme une méthode entièrement automatique, mais comme un processus exploratoire qui combine traitement statistique et interprétation qualitative.
+Enfin, les résultats dépendent fortement des choix effectués en amont : nettoyage du texte, lemmatisation, liste de mots à exclure, taille des segments, paramètres du vectoriseur et nombre de topics. La modélisation thématique ne doit donc pas être comprise comme une méthode entièrement automatique, mais comme un processus exploratoire qui combine traitement statistique et interprétation qualitative avec validation humaine à chaque étapes.
 
 \subsubsection{Bilan méthodologique}
 
 Cette étape de modélisation par NMF permet d’obtenir une première cartographie thématique du corpus romanesque de Zola. Les résultats montrent que les romans peuvent être décrits à partir de grands ensembles thématiques cohérents, liés à la fois aux espaces sociaux, aux relations familiales, aux institutions, aux métiers, aux croyances et aux conflits collectifs.
 
 La NMF constitue donc un outil pertinent pour explorer les thèmes récurrents dans un corpus littéraire volumineux. Elle ne remplace pas l’analyse littéraire, mais elle permet de faire apparaître des régularités lexicales et thématiques qui peuvent ensuite être interprétées plus finement. Dans le cadre de cette étude, elle sert à établir une base quantitative pour l’analyse des thèmes présents dans les romans de Zola.
+
+\subsection{La méthode du K-means}
 
 \end{document}
