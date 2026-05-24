@@ -561,4 +561,306 @@ La NMF constitue donc un outil pertinent pour explorer les thèmes récurrents d
 
 \subsection{La méthode du K-means}
 
+Après l'application de la NMF, une seconde méthode a été utilisée afin de compléter l'analyse thématique du corpus : le clustering par K-means. Contrairement à la NMF, qui cherche à décomposer la matrice terme-document en topics latents, K-means vise à regrouper les segments textuels en ensembles homogènes à partir de leur proximité lexicale. L'objectif n'est donc pas exactement le même : la NMF permet d'identifier des thèmes sous forme de combinaisons de mots, tandis que K-means permet de regrouper les paquets de phrases qui présentent des profils lexicaux similaires.
+
+Cette seconde méthode a été utilisée comme un outil de comparaison et de validation. Elle permet de vérifier si les regroupements produits par la NMF correspondent également à des ensembles cohérents lorsque l'on applique une méthode de clustering non supervisée. Dans le cadre de cette analyse, chaque paquet de phrases constitue une unité d'observation, représentée numériquement par une matrice TF-IDF. Les clusters obtenus correspondent donc à des groupes de segments partageant des termes caractéristiques.
+
+\subsubsection{Préparation de la matrice TF-IDF}
+
+Comme pour la NMF, la première étape consiste à transformer les textes lemmatisés en une représentation numérique. La matrice utilisée pour le K-means est construite à partir des segments lemmatisés du corpus. Le même type de vectorisation TF-IDF et les meme parametres ont été conservé afin d'assurer une cohérence méthodologique entre les deux approches\footnote{Cf: "preparation de la matrice NMF" dans l'approche NMF}.
+
+\begin{lstlisting}[language=Python, caption={Création de la matrice TF-IDF pour le clustering K-means}]
+vectorizer = TfidfVectorizer(
+    min_df=3,
+    max_df=0.8
+)
+X = vectorizer.fit_transform(df["phrases_lemm"])
+\end{lstlisting}
+
+Ce choix permet de travailler sur une matrice plus lisible et plus pertinente pour le clustering. Le but n'est pas seulement de réduire le nombre de dimensions, mais aussi de conserver les mots qui participent réellement à la différenciation des segments. Cette étape est essentielle, car la qualité des clusters dépend directement de la qualité de la représentation vectorielle utilisée.
+
+\subsubsection{Recherche du nombre de clusters}
+
+Le choix du nombre de clusters est une étape centrale dans l'utilisation de K-means. Un nombre trop faible de clusters risque de produire des groupes trop généraux, dans lesquels plusieurs thèmes différents seraient mélangés. À l'inverse, un nombre trop élevé peut produire des groupes trop fragmentés, difficiles à interpréter ou très proches les uns des autres.
+
+Afin d'orienter ce choix, plusieurs valeurs de \texttt{k} ont été testées. Pour chaque valeur comprise entre 2 et 40, un modèle K-means a été entraîné, puis évalué à l'aide du score de silhouette\footnote{Peter J. Rousseeuw, « Silhouettes: A graphical aid to the interpretation and validation of cluster analysis », \textit{Journal of Computational and Applied Mathematics}, vol. 20, 1er novembre 1987, p. 53–65 }. 
+
+
+
+
+Ce score mesure la qualité de la séparation entre les clusters : plus il est élevé, plus les segments sont proches des éléments de leur propre cluster et éloignés des autres clusters.
+
+\begin{lstlisting}[language=Python, caption={Évaluation du nombre de clusters par score de silhouette}]
+scores = []
+
+for k in range(2, 41):
+    model = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init=10
+    )
+    labels = model.fit_predict(X)
+    score = silhouette_score(X, labels)
+    scores.append((k, score))
+
+scores_df = pd.DataFrame(scores, columns=["k", "silhouette"])
+\end{lstlisting}
+
+Une visualisation des scores de silhouette a ensuite été produite afin d'observer l'évolution de la qualité du clustering selon le nombre de clusters.
+
+\begin{lstlisting}[language=Python, caption={Visualisation du score de silhouette selon le nombre de clusters}]
+plt.figure(figsize=(10, 6))
+plt.xticks(range(2, 41))
+
+plt.plot(scores_df["k"], scores_df["silhouette"], marker="o")
+
+plt.xlabel("Nombre de clusters k")
+plt.ylabel("Score de silhouette")
+plt.title("Score de silhouette selon le nombre de clusters")
+
+plt.show()
+\end{lstlisting}
+
+Dans cette analyse, le score de silhouette fournit une indication quantitative, mais il ne suffit pas à lui seul à déterminer le nombre de clusters à retenir. Comme pour la NMF, le choix final repose donc sur un compromis entre indicateurs statistiques, lisibilité des résultats et cohérence interprétative. Le nombre de 29 clusters a été retenu afin de permettre une comparaison directe avec les 29 topics issus de la NMF, tout en conservant un niveau de détail suffisant pour distinguer les principaux motifs thématiques du corpus.
+
+\subsubsection{Entraînement du modèle K-means}
+
+Le modèle K-means final a été entraîné avec 29 clusters. Le paramètre \texttt{random\_state=42} permet d'assurer la reproductibilité des résultats, tandis que le paramètre \texttt{n\_init=10} indique que l'algorithme est lancé plusieurs fois avec des initialisations différentes afin de retenir la meilleure solution.
+
+\begin{lstlisting}[language=Python, caption={Entraînement du modèle K-means final}]
+kmeans = KMeans(
+    n_clusters=29,
+    random_state=42,
+    n_init=10
+)
+
+df["cluster"] = kmeans.fit_predict(X) + 1
+\end{lstlisting}
+
+Chaque segment du corpus reçoit ainsi un numéro de cluster. L'ajout de \texttt{+ 1} permet de numéroter les clusters à partir de 1 plutôt qu'à partir de 0, ce qui rend les résultats plus lisibles dans les tableaux et les visualisations. Chaque paquet de phrases est donc associé à un groupe thématique déterminé par sa proximité avec les autres segments du corpus.
+
+Contrairement à la NMF, qui attribue à chaque segment un poids pour chacun des topics, K-means attribue chaque segment à un seul cluster. Cette différence est importante : la NMF autorise une lecture plus graduelle des thèmes, tandis que K-means produit une classification plus nette. Un segment appartient à un cluster principal, même s'il peut contenir plusieurs motifs thématiques.
+
+\subsubsection{Extraction des mots caractéristiques des clusters}
+
+Une fois le modèle entraîné, les centres des clusters ont été analysés afin d'identifier les termes les plus représentatifs de chaque groupe. Dans K-means, chaque cluster est représenté par un centroïde, c'est-à-dire un point moyen dans l'espace vectoriel. Les termes les plus fortement associés à ce centroïde permettent de comprendre le contenu thématique du cluster.
+
+\begin{lstlisting}[language=Python, caption={Extraction des mots les plus représentatifs par cluster}]
+terms = vectorizer.get_feature_names_out()
+centres = kmeans.cluster_centers_
+
+for i, centre in enumerate(centres):
+    top_indices = centre.argsort()[::-1][:10]
+    mots = [terms[j] for j in top_indices]
+    print(f"Cluster {i+1} :", " | ".join(mots))
+\end{lstlisting}
+
+Cette étape est comparable à l'extraction des mots dominants dans la NMF. Elle permet d'associer chaque cluster à un ensemble de termes caractéristiques. Cependant, l'interprétation est légèrement différente : dans la NMF, les mots sont associés à un topic latent ; dans K-means, ils décrivent le centre lexical d'un groupe de segments. Autrement dit, les mots obtenus indiquent ce qui rapproche les segments d'un même cluster.
+
+Cette extraction permet de vérifier la cohérence interne des clusters. Lorsqu'un cluster rassemble des mots appartenant au même champ lexical, il devient plus facilement interprétable. À l'inverse, un cluster contenant des mots trop dispersés ou peu cohérents peut indiquer un regroupement moins stable ou plus difficile à nommer.
+
+\subsubsection{Nomination des clusters}
+
+Les clusters ont ensuite été nommés manuellement à partir des mots les plus représentatifs et de l'observation des segments associés. Cette étape est indispensable, car K-means ne produit pas directement des intitulés interprétables. Comme pour la NMF, le passage du résultat numérique à l'interprétation thématique repose donc sur une lecture qualitative.
+
+\begin{lstlisting}[language=Python, caption={Attribution manuelle des noms de clusters}]
+noms_clusters_kmeans = {
+    1: "La table, les repas et les boissons",
+    2: "L'ecole, les eleves et l'instruction",
+    3: "Le salon, l'aristocratie et les apparences",
+    4: "La chambre, le lit et l'espace domestique",
+    5: "L'enfance, la maternite et la pauvrete",
+    6: "La mere, les enfants et la famille",
+    7: "Le monde ferroviaire",
+    8: "L'amour, les sentiments et la jeunesse",
+    9: "Le theatre, la loge et les scenes mondaines",
+    10: "Le clerge et la paroisse",
+    11: "La nature et le paysage",
+    12: "Le miracle, le pelerinage et la religion",
+    13: "Le monde medical et la sante",
+    14: "Le pelerinage, la maladie et le voyage",
+    15: "L'insurrection et la revolution",
+    16: "Le quartier, la rue et la ville",
+    17: "Le desir, le corps et les relations amoureuses",
+    18: "Le pouvoir politique et les affaires publiques",
+    19: "Le travail, le peuple et le monde ouvrier",
+    20: "La bourse, la finance et les affaires",
+    21: "L'argent du quotidien",
+    22: "Les conversations et les scenes domestiques",
+    23: "Le monde artistique et la peinture",
+    24: "La mine, les ouvriers et la greve",
+    25: "Le magasin, la vente et les clientes",
+    26: "La guerre, les soldats et l'armee",
+    27: "Le pouvoir religieux",
+    28: "Les liens familiaux, l'ecriture et la justice",
+    29: "La terre, les animaux et le monde paysan"
+}
+
+df["nom_cluster"] = df["cluster"].map(noms_clusters_kmeans)
+\end{lstlisting}
+
+Les intitulés obtenus montrent que les clusters couvrent des dimensions proches de celles observées avec la NMF. On retrouve par exemple des ensembles liés au travail, à la mine, à la finance, à la religion, à la famille, au monde domestique, à la guerre ou encore aux espaces urbains. Cette convergence entre les deux méthodes est intéressante, car elle indique que certains thèmes apparaissent de manière stable dans le corpus, indépendamment de la méthode utilisée.
+
+Cependant, les clusters K-means ne doivent pas être interprétés comme des catégories fixes ou naturelles. Ils résultent d'un regroupement algorithmique fondé sur la proximité lexicale des segments. Leur nomination repose donc sur un choix interprétatif, à partir des mots les plus représentatifs et des extraits textuels associés.
+
+\subsubsection{Regroupement hiérarchique des clusters}
+
+Afin de mieux comprendre les relations entre les 29 clusters, une classification ascendante hiérarchique a été appliquée aux centres des clusters. Cette étape permet de regrouper les clusters proches entre eux et d'identifier des familles thématiques plus larges. Elle complète donc le K-means en donnant une lecture plus synthétique de la structure thématique du corpus.
+
+\begin{lstlisting}[language=Python, caption={Classification hiérarchique sur les centres des clusters}]
+Z = linkage(centres, method="ward")
+
+dendrogram(
+    Z,
+    labels=[f"Cluster {i+1}" for i in range(kmeans.n_clusters)],
+    orientation="right",
+    color_threshold=0.40
+)
+
+plt.axvline(x=0.40, color="red", linestyle="--")
+
+plt.title("CAH sur les clusters K-means")
+plt.xlabel("Distance")
+plt.show()
+\end{lstlisting}
+
+La méthode de Ward a été utilisée pour construire la hiérarchie. Elle cherche à regrouper les clusters en minimisant l'augmentation de la variance interne à chaque fusion. Le dendrogramme permet ensuite de visualiser les proximités entre clusters. Le seuil de distance fixé à 0,40 sert à découper l'arbre en grandes familles de motifs.
+
+Cette étape est utile car 29 clusters peuvent être difficiles à interpréter globalement. Le regroupement hiérarchique permet de passer d'une lecture détaillée, cluster par cluster, à une lecture plus générale, organisée autour de grandes familles thématiques.
+
+\subsubsection{Création des grandes familles de motifs}
+
+À partir du dendrogramme, les clusters ont été regroupés en cinq grandes familles de motifs. Cette opération permet de simplifier l'analyse et de faire apparaître les grandes zones thématiques du corpus.
+
+\begin{lstlisting}[language=Python, caption={Création des groupes CAH à partir des clusters K-means}]
+groupes_cah = fcluster(Z, t=0.40, criterion="distance")
+
+df_groupes = pd.DataFrame({
+    "cluster": range(1, kmeans.n_clusters + 1),
+    "groupe_cah": groupes_cah
+})
+
+df_groupes["nom_cluster"] = df_groupes["cluster"].map(
+    noms_clusters_kmeans
+)
+\end{lstlisting}
+
+Les groupes obtenus ont ensuite été nommés manuellement, en fonction des clusters qu'ils rassemblent.
+
+\begin{lstlisting}[language=Python, caption={Nomination des grandes familles de motifs}]
+noms_groupes_cah = {
+    1: "Religion locale et autorite clericale",
+    2: "Guerre, insurrection et conflit politique",
+    3: "Institutions, croyances et encadrement social",
+    4: "Argent, dettes et circulation financiere",
+    5: "Vie quotidienne, espaces sociaux et experiences individuelles"
+}
+
+df_groupes["nom_groupe_cah"] = df_groupes["groupe_cah"].map(
+    noms_groupes_cah
+)
+\end{lstlisting}
+
+Ces grandes familles permettent d'obtenir une lecture plus synthétique des résultats. La première famille regroupe les thèmes liés à la religion locale et à l'autorité cléricale. La deuxième rassemble les motifs de guerre, d'insurrection et de conflit politique. La troisième renvoie aux institutions, aux croyances et aux formes d'encadrement social. La quatrième concerne l'argent, les dettes et les circulations financières. Enfin, la cinquième regroupe les motifs les plus liés à la vie quotidienne, aux espaces sociaux et aux expériences individuelles.
+
+Cette structuration est particulièrement utile pour l'analyse littéraire, car elle permet de passer d'une liste de clusters nombreux à une organisation thématique plus lisible. Elle montre aussi que les motifs extraits par K-means ne sont pas isolés, mais peuvent être regroupés en ensembles plus larges correspondant à des dimensions importantes de l'œuvre de Zola.
+
+\subsubsection{Attribution des grandes familles aux segments}
+
+Une fois les groupes hiérarchiques définis, chaque segment du corpus a reçu une étiquette correspondant à la grande famille de motifs associée à son cluster. Cette opération permet d'analyser non seulement les clusters détaillés, mais aussi les grandes catégories thématiques dans lesquelles ils s'inscrivent.
+
+\begin{lstlisting}[language=Python, caption={Attribution des groupes CAH aux segments du corpus}]
+cluster_vers_groupe = dict(
+    zip(df_groupes["cluster"], df_groupes["groupe_cah"])
+)
+
+df["groupe_cah"] = df["cluster"].map(cluster_vers_groupe)
+df["nom_groupe_cah"] = df["groupe_cah"].map(noms_groupes_cah)
+\end{lstlisting}
+
+Cette étape permet de relier chaque paquet de phrases à deux niveaux d'analyse. Le premier niveau est le cluster K-means, qui fournit une catégorie thématique fine. Le second niveau est le groupe CAH, qui fournit une catégorie plus générale. Cette double échelle d'interprétation est utile car elle permet d'adapter le niveau de détail selon les besoins de l'analyse : on peut étudier les motifs précis, ou bien observer les grandes tendances du corpus.
+
+\subsubsection{Analyse de la répartition des clusters}
+
+Après la nomination des clusters et des grandes familles, plusieurs visualisations ont été produites afin d'étudier leur répartition dans le corpus. La première consiste à compter le nombre de segments associés à chaque grande famille de motifs.
+
+\begin{lstlisting}[language=Python, caption={Nombre de segments par grande famille de motifs}]
+counts = df["nom_groupe_cah"].value_counts().sort_values()
+
+plt.figure(figsize=(10, 6))
+counts.plot(kind="barh")
+
+plt.title("Nombre de segments par grande famille de motifs")
+plt.xlabel("Nombre de segments")
+plt.ylabel("Groupe CAH")
+plt.show()
+\end{lstlisting}
+
+Cette visualisation permet d'identifier les grandes familles les plus représentées dans l'ensemble du corpus. Elle donne une lecture globale de l'organisation thématique des segments. Une famille très représentée indique qu'un ensemble de motifs revient fréquemment dans les romans, tandis qu'une famille moins présente peut correspondre à un thème plus spécifique, associé à certains romans ou à certaines situations narratives.
+
+Une seconde visualisation a été produite à l'échelle des clusters détaillés.
+
+
+Cette représentation permet de voir quels clusters sont les plus fréquents dans le corpus. Elle est plus précise que l'analyse par grandes familles, car elle distingue les motifs thématiques particuliers. Elle permet par exemple d'observer séparément les clusters associés à la mine, à la finance, à la religion, à la famille ou au monde domestique.
+
+\subsubsection{Distribution des clusters par œuvre}
+
+Afin d'observer la présence des clusters dans chaque roman, une table croisée a été construite entre les fichiers du corpus et les clusters thématiques. La normalisation par ligne permet d'obtenir, pour chaque œuvre, la proportion de segments associés à chaque cluster.
+
+
+
+Cette analyse est importante car elle permet de relier les clusters aux romans. Certains clusters peuvent être très transversaux et apparaître dans de nombreuses œuvres, tandis que d'autres peuvent être fortement associés à un roman précis. Par exemple, un cluster lié à la mine peut être particulièrement représenté dans \textit{Germinal}, tandis qu'un cluster lié à la finance peut être plus présent dans \textit{L'Argent}. De la même manière, les clusters associés au commerce peuvent être importants dans \textit{Au Bonheur des dames}, et ceux liés à la guerre dans \textit{La Débâcle}.
+
+Une analyse similaire a été réalisée au niveau des grandes familles de motifs.
+
+
+
+Cette seconde visualisation offre une lecture plus synthétique. Elle permet de comparer les romans selon les grandes familles de motifs qui les structurent. Cette approche est particulièrement utile pour repérer des oppositions ou des proximités entre les œuvres : certains romans peuvent être dominés par des motifs de vie quotidienne, tandis que d'autres accordent plus de place aux institutions, à la religion, à la guerre ou aux conflits sociaux.
+
+\subsubsection{Projection UMAP des segments}
+
+Une projection UMAP a enfin été utilisée pour représenter les segments dans un espace en deux dimensions. Cette méthode de réduction de dimensionnalité permet de visualiser la manière dont les segments se répartissent selon leur proximité lexicale. Les points sont colorés selon leur grande famille de motifs.
+
+\begin{lstlisting}[language=Python, caption={Projection UMAP des segments par grande famille de motifs}]
+reducer = umap.UMAP(n_components=2, random_state=42)
+X_umap = reducer.fit_transform(X)
+
+plt.figure(figsize=(10, 7))
+
+plt.scatter(
+    X_umap[:, 0],
+    X_umap[:, 1],
+    c=df["groupe_cah"],
+    cmap="tab10",
+    s=10,
+    alpha=0.7
+)
+
+plt.title("Projection UMAP des segments par grande famille de motifs")
+plt.xlabel("UMAP 1")
+plt.ylabel("UMAP 2")
+plt.colorbar(label="Groupe CAH")
+plt.show()
+\end{lstlisting}
+
+Cette visualisation ne doit pas être interprétée comme une preuve définitive de séparation entre les groupes, mais comme un outil exploratoire. Elle permet d'observer si les segments associés à une même famille de motifs tendent à se rapprocher dans l'espace vectoriel. Si certaines zones apparaissent relativement regroupées, cela peut indiquer que les familles thématiques correspondent à des structures lexicales cohérentes. À l'inverse, des zones plus mélangées peuvent signaler des motifs plus transversaux ou des segments hybrides.
+
+\subsubsection{Limites de l'approche par K-means}
+
+L'utilisation de K-means présente plusieurs limites qu'il faut prendre en compte. Tout d'abord, la méthode impose une appartenance unique de chaque segment à un cluster. Or, dans un texte littéraire, un même passage peut contenir plusieurs thèmes simultanément. Un segment peut par exemple associer la famille, l'argent et la souffrance sociale, mais K-means l'attribue malgré tout à un seul groupe. Cette contrainte rend la méthode moins souple que la NMF pour représenter la complexité thématique des textes.
+
+Ensuite, le choix du nombre de clusters reste en partie subjectif. Le score de silhouette fournit une indication utile, mais il ne suffit pas toujours à identifier une valeur optimale. Dans cette analyse, le choix de 29 clusters repose donc sur un arbitrage méthodologique : il permet de conserver un niveau de détail comparable à celui de la NMF, tout en produisant des catégories suffisamment interprétables.
+
+Une autre limite concerne la sensibilité de K-means à la représentation vectorielle. Les clusters dépendent fortement de la matrice TF-IDF, des choix de lemmatisation, de la liste de mots exclus et des paramètres \texttt{min\_df} et \texttt{max\_df}. Une modification de ces choix peut modifier la structure des clusters obtenus. Les résultats doivent donc être compris comme une cartographie exploratoire du corpus, et non comme une classification définitive.
+
+Enfin, comme pour la NMF, la nomination des clusters repose sur une interprétation humaine. Les intitulés attribués aux clusters et aux grandes familles de motifs sont construits à partir des mots les plus représentatifs et de l'observation des segments. Cette étape qualitative est nécessaire pour donner du sens aux résultats, mais elle introduit aussi une part de subjectivité.
+
+\subsubsection{Bilan méthodologique}
+
+La méthode K-means permet de compléter l'analyse réalisée avec la NMF. Elle offre une autre manière d'observer les régularités thématiques du corpus, non plus sous la forme de topics latents, mais sous la forme de groupes de segments lexicalement proches. Cette approche confirme plusieurs motifs déjà observés avec la NMF, notamment autour du travail, de la religion, de la famille, de l'argent, de la guerre, de la mine, du commerce ou de l'espace domestique.
+
+L'ajout d'une classification hiérarchique sur les centres des clusters permet également d'organiser les résultats en grandes familles de motifs. Cette étape rend l'analyse plus lisible, car elle permet de passer de 29 clusters détaillés à cinq ensembles thématiques plus généraux. Ces familles offrent une vision synthétique de la structure thématique du corpus et facilitent la comparaison entre les œuvres.
+
+Ainsi, K-means ne remplace pas la NMF, mais il constitue un complément méthodologique utile. En croisant les résultats des deux méthodes, il devient possible de distinguer les thèmes particulièrement stables de ceux qui dépendent davantage du modèle utilisé. Cette double approche renforce donc la solidité de l'analyse, tout en conservant une part d'interprétation qualitative indispensable dans l'étude d'un corpus littéraire.
+
 \end{document}
