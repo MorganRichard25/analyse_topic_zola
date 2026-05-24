@@ -7,6 +7,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{float}
+\usepackage{graphicx}
 
 \lstset{
   basicstyle=\ttfamily\footnotesize,
@@ -585,9 +586,6 @@ Le choix du nombre de clusters est une étape centrale dans l'utilisation de K-m
 
 Afin d'orienter ce choix, plusieurs valeurs de \texttt{k} ont été testées. Pour chaque valeur comprise entre 2 et 40, un modèle K-means a été entraîné, puis évalué à l'aide du score de silhouette\footnote{Peter J. Rousseeuw, « Silhouettes: A graphical aid to the interpretation and validation of cluster analysis », \textit{Journal of Computational and Applied Mathematics}, vol. 20, 1er novembre 1987, p. 53–65 }. 
 
-
-
-
 Ce score mesure la qualité de la séparation entre les clusters : plus il est élevé, plus les segments sont proches des éléments de leur propre cluster et éloignés des autres clusters.
 
 \begin{lstlisting}[language=Python, caption={Évaluation du nombre de clusters par score de silhouette}]
@@ -621,7 +619,7 @@ plt.title("Score de silhouette selon le nombre de clusters")
 plt.show()
 \end{lstlisting}
 
-Dans cette analyse, le score de silhouette fournit une indication quantitative, mais il ne suffit pas à lui seul à déterminer le nombre de clusters à retenir. Comme pour la NMF, le choix final repose donc sur un compromis entre indicateurs statistiques, lisibilité des résultats et cohérence interprétative. Le nombre de 29 clusters a été retenu afin de permettre une comparaison directe avec les 29 topics issus de la NMF, tout en conservant un niveau de détail suffisant pour distinguer les principaux motifs thématiques du corpus.
+Dans cette analyse, le score de silhouette fournit une indication quantitative, mais il ne suffit pas à lui seul à déterminer le nombre de clusters à retenir. Comme pour la NMF, le choix final repose donc sur un compromis entre indicateurs statistiques, lisibilité des résultats et cohérence interprétative. Le nombre de 29 clusters a été retenu afin de permettre une comparaison directe avec les 29 topics issus de la NMF, tout en conservant un niveau de détail suffisant pour distinguer les principaux motifs thématiques du corpus, de plus le score de silhouette reste relativement stable autour de cette valeur, ce qui indique que les clusters obtenus sont globalement cohérents comme pour la NMF.
 
 \subsubsection{Entraînement du modèle K-means}
 
@@ -851,7 +849,7 @@ L'utilisation de K-means présente plusieurs limites qu'il faut prendre en compt
 
 Ensuite, le choix du nombre de clusters reste en partie subjectif. Le score de silhouette fournit une indication utile, mais il ne suffit pas toujours à identifier une valeur optimale. Dans cette analyse, le choix de 29 clusters repose donc sur un arbitrage méthodologique : il permet de conserver un niveau de détail comparable à celui de la NMF, tout en produisant des catégories suffisamment interprétables.
 
-Une autre limite concerne la sensibilité de K-means à la représentation vectorielle. Les clusters dépendent fortement de la matrice TF-IDF, des choix de lemmatisation, de la liste de mots exclus et des paramètres \texttt{min\_df} et \texttt{max\_df}. Une modification de ces choix peut modifier la structure des clusters obtenus. Les résultats doivent donc être compris comme une cartographie exploratoire du corpus, et non comme une classification définitive.
+Une autre limite concerne la sensibilité de K-means à la représentation vectorielle. Les clusters dépendent fortement de la matrice TF-IDF, des choix de lemmatisation, de la liste de mots exclus et des paramètres \texttt{min\_df} et \texttt{max\_df}. Une modification de ces choix peut modifier la structure des clusters obtenus tout comme la méthode du NMF. Les résultats doivent donc être compris comme une cartographie exploratoire du corpus, et non comme une classification définitive.
 
 Enfin, comme pour la NMF, la nomination des clusters repose sur une interprétation humaine. Les intitulés attribués aux clusters et aux grandes familles de motifs sont construits à partir des mots les plus représentatifs et de l'observation des segments. Cette étape qualitative est nécessaire pour donner du sens aux résultats, mais elle introduit aussi une part de subjectivité.
 
