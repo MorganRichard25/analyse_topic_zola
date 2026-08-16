@@ -11,7 +11,7 @@ Le dépôt correspond à une phase expérimentale : les données sont préparée
 - nettoyage et lemmatisation : terminés ;
 - expérimentation avec NMF : réalisée avec 29 topics ;
 - expérimentation avec KMeans : réalisée avec 29 clusters ;
-- comparaison formelle des modèles et validation des thèmes : à poursuivre.
+
 
 Les noms donnés aux topics, aux clusters et aux familles de clusters sont des interprétations manuelles fondées sur leurs mots les plus représentatifs. Ils doivent donc être considérés comme provisoires.
 
@@ -311,7 +311,7 @@ Les modèles entraînés, les affectations thématiques et les figures ne sont p
 - Les chemins relatifs imposent d’exécuter les notebooks depuis le dossier `notebooks/`.
 - Les résultats de modélisation ne sont pas encore exportés ni versionnés séparément.
 
-## Suite du projet
+## Possibilité de suite du projet
 
 Les prochaines étapes consistent notamment à :
 
